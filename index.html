@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Food Plan to Excel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1f3864; --ink:#18223a; --sky:#ddebf7; --paper:#f6f8fc; --white:#fff;
+    --line:#c7d2e4; --muted:#5b6780; --flag:#ffe680; --ok:#cdeed6; --okink:#0b5a2a;
+    --bad:#f6c9c5; --badink:#8a1c14; --warn:#fbe4b5; --warnink:#7a4b00;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{background:var(--navy);color:#fff;padding:22px 20px 20px}
+  header .in{max-width:1200px;margin:0 auto}
+  header h1{margin:0 0 4px;font-size:24px;font-weight:700;letter-spacing:-.01em}
+  header p{margin:0;color:#c9d8f0;max-width:62ch}
+  main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+  section{background:var(--white);border:1px solid var(--line);border-radius:6px;margin:0 0 18px}
+  section>h2{margin:0;padding:11px 16px;font-size:16px;background:var(--sky);border-bottom:1px solid var(--line);border-radius:6px 6px 0 0}
+  .body{padding:16px}
+  label{font-weight:600;font-size:13px}
+  input[type=date],select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink)}
+  .row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:14px}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .drop{display:block;border:2px dashed #8da2c6;border-radius:6px;padding:26px 16px;text-align:center;cursor:pointer;background:#fbfdff}
+  .drop.over{background:var(--sky);border-color:var(--navy)}
+  .drop strong{display:block;font-size:16px}
+  .drop span{color:var(--muted);font-size:13px}
+  .drop input{display:none}
+  .files{margin:14px 0 0;display:grid;gap:8px}
+  .file{display:grid;grid-template-columns:64px 1fr auto auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:5px;padding:8px}
+  .file img{width:64px;height:48px;object-fit:cover;border-radius:3px;border:1px solid var(--line)}
+  .file .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+  .file .st{font-size:12px;color:var(--muted)}
+  .file .bar{height:4px;background:#e6ecf6;border-radius:2px;margin-top:5px;overflow:hidden}
+  .file .bar i{display:block;height:100%;width:0;background:var(--navy);transition:width .2s}
+  button{font:inherit;cursor:pointer;border-radius:5px;border:1px solid var(--navy);padding:9px 16px;font-weight:600}
+  button.primary{background:var(--navy);color:#fff}
+  button.primary:disabled{opacity:.45;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--navy)}
+  button.small{padding:4px 9px;font-size:12px}
+  button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #2b6be0;outline-offset:1px}
+  .opts{display:flex;flex-wrap:wrap;gap:18px;align-items:center;color:var(--muted);font-size:13px}
+  .opts label{font-weight:500;color:var(--ink)}
+  .msg{padding:10px 12px;border-radius:5px;margin:12px 0 0;font-size:14px}
+  .msg.err{background:var(--bad);color:var(--badink)}
+  .msg.info{background:var(--sky);color:var(--navy)}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  .stat{border:1px solid var(--line);border-radius:5px;padding:8px 12px;min-width:130px}
+  .stat b{display:block;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+  .stat.warn{background:var(--warn);border-color:#e3c27a}
+  .block{border:1px solid var(--line);border-radius:5px;margin:0 0 16px}
+  .block>.hd{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 12px;background:#eef4fb;border-bottom:1px solid var(--line)}
+  .block>.hd .t{font-weight:700;margin-right:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40ch}
+  details{padding:6px 12px;border-bottom:1px solid var(--line);font-size:13px}
+  details summary{cursor:pointer;color:var(--navy);font-weight:600}
+  details img{max-width:100%;max-height:420px;display:block;margin-top:8px;border:1px solid var(--line);cursor:zoom-in}
+  details img.zoom{max-height:none;max-width:none;cursor:zoom-out}
+  details .zoomwrap{overflow:auto;max-height:80vh}
+  details pre{white-space:pre-wrap;font-size:12px;max-height:260px;overflow:auto;background:#f6f8fc;padding:8px;border-radius:4px}
+  .grid{overflow:auto;max-height:70vh}
+  table{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+  th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;background:#fff;white-space:nowrap}
+  th{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;font-weight:600;padding:6px 6px;white-space:normal;text-align:left;min-width:78px;font-size:12px;vertical-align:bottom}
+  td.sticky,th.sticky{position:sticky;left:0;z-index:3;min-width:230px}
+  th.sticky{z-index:4}
+  tr.sum td{background:#eef4fb}
+  tr.sum td.sticky{background:#eef4fb}
+  td input,td select{width:100%;border:0;background:transparent;padding:6px 6px;font:inherit;border-radius:0;color:inherit}
+  td input.num{text-align:right;font-variant-numeric:tabular-nums;min-width:78px}
+  td input:focus{background:#fff8d1;outline:2px solid #2b6be0;outline-offset:-2px}
+  td input.flag{background:var(--flag)}
+  td.calc{text-align:right;padding:6px;font-variant-numeric:tabular-nums;color:var(--muted)}
+  td.status{padding:6px;font-weight:700;text-align:center;min-width:120px;font-size:12px}
+  td.status.MATCH{background:var(--ok);color:var(--okink)}
+  td.status.CHECK{background:var(--bad);color:var(--badink)}
+  td.status.NOSRC{background:var(--warn);color:var(--warnink)}
+  td.act{padding:4px 6px}
+  .legend{font-size:12px;color:var(--muted);margin:0 0 12px}
+  .legend i{display:inline-block;width:12px;height:12px;background:var(--flag);border:1px solid #d9bd3c;vertical-align:-2px;margin-right:4px}
+  .hidden{display:none!important}
+  @media (max-width:640px){
+    .file{grid-template-columns:48px 1fr auto}
+    .file select{grid-column:2/4}
+    td.sticky,th.sticky{min-width:160px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Daily Food Plan to Excel</h1>
+  <p>Upload the Breakfast, Lunch and Dinner images of the raw materials plan. Check what was read, fix anything highlighted, then download the workbook.</p>
+</div></header>
+
+<main>
+  <section id="sUpload">
+    <h2>1. Upload images</h2>
+    <div class="body">
+      <div class="row">
+        <div class="field">
+          <label for="planDate">Plan date</label>
+          <input type="date" id="planDate" value="2026-10-11">
+        </div>
+        <div class="field">
+          <label for="mode">Reading mode</label>
+          <select id="mode">
+            <option value="6">Table (try first)</option>
+            <option value="11">Sparse text (if rows are missing)</option>
+          </select>
+        </div>
+        <div class="opts">
+          <label><input type="checkbox" id="carry"> Fill blank Group Name from the row above</label>
+        </div>
+      </div>
+
+```
+  <label class="drop" id="drop" for="fileInput">
+    <strong>Choose images or drop them here</strong>
+    <span>PNG or JPG screenshots. You can also paste a screenshot with Ctrl+V.</span>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+  </label>
+
+  <div class="files" id="files"></div>
+  <div id="uploadMsg"></div>
+
+  <div class="row" style="margin:16px 0 0">
+    <button class="primary" id="btnRead" disabled>Read images</button>
+    <span class="legend" style="margin:0">Reading runs in your browser. The first run downloads the text-reading data, so it needs internet.</span>
+  </div>
+</div>
+```
+
+  </section>
+
+  <section id="sReview" class="hidden">
+    <h2>2. Check the readings</h2>
+    <div class="body">
+      <div class="row" style="margin-bottom:10px"><span class="legend" style="margin:0">Your edits are saved in this browser automatically.</span><button class="ghost small" id="btnClear">Clear saved data</button></div>
+      <div class="stats" id="stats"></div>
+      <p class="legend"><i></i>Yellow cells were hard to read or were adjusted. Compare them with the source image and edit; the highlight clears when you change the cell. Nothing is guessed for you: empty stays empty.</p>
+      <div id="blocks"></div>
+    </div>
+  </section>
+
+  <section id="sExport" class="hidden">
+    <h2>3. Download workbook</h2>
+    <div class="body">
+      <p style="margin-top:0">Sheets: BREAKFAST, LUNCH, DINNER, DAILY SUMMARY, RAW DATA (plus SOURCE SUBTOTALS if summary rows were found). Totals are formulas, so they update when you edit quantities in Excel.</p>
+      <button class="primary" id="btnExport">Download Daily_Raw_Materials_Food_Plan.xlsx</button>
+      <div id="exportMsg"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ PARSER (no DOM access) ============ -->
+
+<script id="parser">
+var DEPTS=["ACADEMY","DINING HALL","EVENT 1","GOKULPOINT-MASTER'S HOME","HARI UNIVERSITY","KCC CANTEEN","KITCHEN STAFF","PACKING","PARIVAR","PARIVAR STAFF","THLC CANTEEN","WELLNESS"];
+var SESSIONS=["BREAKFAST","LUNCH","DINNER"];
+var NC=13; // 12 departments + total
+var KEYS=[{i:0,k:"ACADEMY"},{i:1,k:"DINING"},{i:2,k:"EVENT"},{i:3,k:"GOKULPOINT"},{i:4,k:"HARI"},{i:5,k:"KCC"},{i:6,k:"KITCHEN"},{i:7,k:"PACKING"},{i:8,k:"PARIVAR"},{i:10,k:"THLC"},{i:11,k:"WELLNESS"},{i:12,k:"TOTAL"}];
+var _uid=0; function nid(){ return "r"+(++_uid); }
+
+function lev(a,b){
+  var m=a.length,n=b.length,d=[],i,j;
+  for(i=0;i<=m;i++){d[i]=[i];}
+  for(j=1;j<=n;j++){d[0][j]=j;}
+  for(i=1;i<=m;i++){for(j=1;j<=n;j++){
+    d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  }}
+  return d[m][n];
+}
+function median(a){ if(!a.length) return 0; var s=a.slice().sort(function(x,y){return x-y;}); var k=Math.floor(s.length/2); return s.length%2?s[k]:(s[k-1]+s[k])/2; }
+function matchKey(text){
+  var w=text.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(w.length<3) return -1;
+  for(var q=0;q<KEYS.length;q++){
+    var k=KEYS[q].k, n=Math.min(k.length,w.length,6);
+    if(n<3||w.length<Math.min(k.length,4)) continue;
+    var tol=n>=5?1:0;
+    if(lev(w.slice(0,n),k.slice(0,n))<=tol) return KEYS[q].i;
+  }
+  return -1;
+}
+function normUom(t){
+  var c=t.replace(/[^A-Za-z0-9]/g,"").toLowerCase();
+  if(/^k[g9]s?$/.test(c)) return "Kg";
+  if(/^n[o0]s$/.test(c)) return "Nos";
+  if(/^(ltr|ltrs|lir|itr|1tr|ltt)$/.test(c)) return "Ltr";
+  return null;
+}
+function isType(t){ var c=t.replace(/[^A-Za-z]/g,"").toUpperCase(); return c==="RM"||c==="MN"; }
+function numInfo(t){
+  var s=t.replace(/[|]/g,"").trim();
+  if(!s) return null;
+  if(/^[-+]?\d+(\.\d+)?$/.test(s)) return {v:s};
+  if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) return {v:s.replace(/,/g,"")};
+  if(/^\d+,\d{1,2}$/.test(s)) return {v:s.replace(",","."),note:"comma read as decimal point"};
+  if(/\d/.test(s)&&/^[0-9OoIlSsBb.,]+$/.test(s)&&s.replace(/[^0-9]/g,"").length>=Math.ceil(s.length/2)){
+    var c=s.replace(/[Oo]/g,"0").replace(/[Il]/g,"1").replace(/[Ss]/g,"5").replace(/[Bb]/g,"8");
+    if(/^\d+(\.\d+)?$/.test(c)) return {v:c,note:'letters in "'+s+'" read as digits'};
+  }
+  return null;
+}
+function isDateTok(t){ return /^\d{1,2}[-\/.]([A-Za-z]{3}|\d{1,2})[-\/.]\d{2,4}$/.test(t); }
+
+function groupLines(words){
+  var h=median(words.map(function(w){return w.y1-w.y0;}))||20;
+  var ws=words.slice().sort(function(a,b){return (a.y0+a.y1)-(b.y0+b.y1);});
+  var lines=[];
+  ws.forEach(function(w){
+    var yc=(w.y0+w.y1)/2, L=lines[lines.length-1];
+    if(L&&Math.abs(yc-L.yc)<0.55*h){
+      L.words.push(w);
+      L.yc=L.words.reduce(function(s,x){return s+(x.y0+x.y1)/2;},0)/L.words.length;
+    } else lines.push({words:[w],yc:yc});
+  });
+  lines.forEach(function(L){
+    L.words.sort(function(a,b){return a.x0-b.x0;});
+    L.y0=Math.min.apply(null,L.words.map(function(w){return w.y0;}));
+    L.y1=Math.max.apply(null,L.words.map(function(w){return w.y1;}));
+  });
+  return {lines:lines,h:h};
+}
+
+function buildAnchors(band){
+  var found=[],i;
+  band.forEach(function(L){ L.words.forEach(function(w){ var k=matchKey(w.text); if(k>=0) found.push({i:k,cx:(w.x0+w.x1)/2,w:w}); }); });
+  var centers=new Array(NC).fill(null);
+  var pv=found.filter(function(f){return f.i===8;}).sort(function(a,b){return a.cx-b.cx;});
+  found.forEach(function(f){ if(f.i!==8&&centers[f.i]===null) centers[f.i]=f.cx; });
+  if(pv.length>=2){ centers[8]=pv[0].cx; centers[9]=pv[1].cx; }
+  else if(pv.length===1){
+    var wd=pv[0].w.x1-pv[0].w.x0, nearStaff=false;
+    band.forEach(function(L){ L.words.forEach(function(w){
+      if(/^STAF/i.test(w.text.replace(/[^A-Za-z]/g,""))&&Math.abs((w.x0+w.x1)/2-pv[0].cx)<0.8*wd&&w!==pv[0].w) nearStaff=true;
+    }); });
+    centers[nearStaff?9:8]=pv[0].cx;
+  }
+  var known=[]; for(i=0;i<NC;i++) if(centers[i]!==null) known.push(i);
+  if(known.length<6) return null;
+  var first=known[0], last=known[known.length-1];
+  var sp=(centers[last]-centers[first])/Math.max(1,(last-first));
+  for(i=0;i<NC;i++){
+    if(centers[i]!==null) continue;
+    var a=-1,b=-1,j;
+    for(j=i-1;j>=0;j--){ if(centers[j]!==null){a=j;break;} }
+    for(j=i+1;j<NC;j++){ if(centers[j]!==null){b=j;break;} }
+    if(a>=0&&b>=0) centers[i]=centers[a]+(centers[b]-centers[a])*(i-a)/(b-a);
+    else if(a>=0) centers[i]=centers[a]+sp*(i-a);
+    else centers[i]=centers[b]-sp*(b-i);
+  }
+  return {id:nid(),centers:centers,guessed:false};
+}
+
+function lowConf(w){ return w.conf!==undefined&&w.conf!==null&&w.conf<62; }
+
+function parseLine(L,cw,hints){
+  var T=L.words, i, ti=T.findIndex(function(w){return isType(w.text);});
+  var ui=-1;
+  for(i=Math.max(ti,-1)+1;i<T.length;i++){ if(normUom(T[i].text)){ui=i;break;} }
+  var out={kind:"text",group:"",item:"",type:"",uom:"",qty:[],flags:{},note:""};
+  var nameEnd=ti>=0?ti:(ui>=0?ui:-1), nameToks, qtyToks=[];
+  if(nameEnd>=0){
+    out.kind="item"; nameToks=T.slice(0,nameEnd);
+    var qs=ui>=0?ui+1:ti+1;
+    var rest=T.slice(qs), junk=[];
+    rest.forEach(function(w){ if(numInfo(w.text)) qtyToks.push(w); else junk.push(w.text); });
+    if(junk.length) out.note="Unread text after quantities: "+junk.join(" ");
+    if(ti>=0){ out.type=T[ti].text.replace(/[^A-Za-z]/g,"").toUpperCase(); if(lowConf(T[ti])) out.flags.type="Low OCR confidence"; }
+    else out.flags.type="Type not found";
+    if(ui>=0){ out.uom=normUom(T[ui].text); if(lowConf(T[ui])) out.flags.uom="Low OCR confidence"; }
+    else out.flags.uom="UoM not found";
+  } else {
+    var nums=T.filter(function(w){return numInfo(w.text);}), texts=T.filter(function(w){return !numInfo(w.text);});
+    var label=texts.map(function(w){return w.text;}).join(" ");
+    if(nums.length===0){
+      T.forEach(function(w){
+        var u=w.text.toUpperCase().replace(/[^A-Z]/g,"");
+        if(SESSIONS.indexOf(u)>=0&&!hints.session) hints.session=u;
+        if(isDateTok(w.text)&&!hints.date) hints.date=w.text;
+      });
+      out.textOnly=texts; return out;
+    }
+    if(texts.length===0||/total|summary|sub|grand/i.test(label)){
+      out.kind="summary"; out.item=label; qtyToks=nums; out.qty=qtyToks; return out;
+    }
+    if(nums.length>=2){
+      out.kind="item"; nameToks=texts; qtyToks=nums;
+      out.flags.type="Type not found"; out.flags.uom="UoM not found";
+    } else { out.textOnly=texts; return out; }
+  }
+  // name region: remove date/session tokens, split group vs item by gap
+  nameToks=(nameToks||[]).filter(function(w){
+    if(isDateTok(w.text)){ if(!hints.date) hints.date=w.text; return false; }
+    var u=w.text.toUpperCase().replace(/[^A-Z]/g,"");
+    if(SESSIONS.indexOf(u)>=0){ if(!hints.session) hints.session=u; return false; }
+    return true;
+  });
+  var cells=[],cur=null;
+  nameToks.forEach(function(w){
+    if(cur&&w.x0-cur.x1<=3.2*cw){ cur.text+=" "+w.text; cur.x1=w.x1; cur.low=cur.low||lowConf(w); }
+    else { cur={text:w.text,x1:w.x1,low:lowConf(w)}; cells.push(cur); }
+  });
+  if(cells.length>=2){
+    out.group=cells[0].text; if(cells[0].low) out.flags.group="Low OCR confidence";
+    out.item=cells.slice(1).map(function(c){return c.text;}).join(" ");
+    if(cells.slice(1).some(function(c){return c.low;})) out.flags.item="Low OCR confidence";
+  } else if(cells.length===1){
+    out.item=cells[0].text; if(cells[0].low) out.flags.item="Low OCR confidence";
+  } else out.flags.item="Item name not found";
+  out.qty=qtyToks;
+  return out;
+}
+
+function assignRow(toks,centers){
+  var res=[],prev=-1;
+  toks.forEach(function(t){
+    var best=-1,bd=Infinity,c;
+    for(c=prev+1;c<NC;c++){ var d=Math.abs(t.cx-centers[c]); if(d<bd){bd=d;best=c;} }
+    if(best<0){best=NC-1;bd=Infinity;}
+    res.push({col:best,dist:bd}); prev=best;
+  });
+  return res;
+}
+
+function assignColumns(rows){
+  var sets={}, none=[];
+  rows.forEach(function(r){
+    r._toks=(r._toks||[]).map(function(w){ var n=numInfo(w.text); return {text:w.text,v:n.v,note:n.note||"",cx:(w.x0+w.x1)/2,conf:w.conf}; });
+    if(r._anch){ (sets[r._anch.id]=sets[r._anch.id]||{a:r._anch,rows:[]}).rows.push(r); } else none.push(r);
+  });
+  // fallback: cluster token positions when no header was recognised
+  if(none.length){
+    var xs=[]; none.forEach(function(r){ r._toks.forEach(function(t){ xs.push(t.cx); }); });
+    xs.sort(function(a,b){return a-b;});
+    var cl=[],gap=0;
+    var widths=none.reduce(function(a,r){return a.concat(r._toks.map(function(t){return t.text.length;}));},[]);
+    gap=Math.max(20,(median(widths)||3)*14);
+    xs.forEach(function(x){ var c=cl[cl.length-1]; if(c&&x-c.last<=gap){c.xs.push(x);c.last=x;} else cl.push({xs:[x],last:x}); });
+    while(cl.length>NC){ // merge closest pair
+      var bi=0,bg=Infinity; for(var i=0;i<cl.length-1;i++){ var g=cl[i+1].xs[0]-cl[i].last; if(g<bg){bg=g;bi=i;} }
+      cl[bi].xs=cl[bi].xs.concat(cl[bi+1].xs); cl[bi].last=cl[bi+1].last; cl.splice(bi+1,1);
+    }
+    var cen=new Array(NC).fill(-1e9), off=NC-cl.length;
+    cl.forEach(function(c,k){ cen[off+k]=median(c.xs); });
+    sets._fallback={a:{id:"fb",centers:cen,guessed:true},rows:none};
+  }
+  Object.keys(sets).forEach(function(key){
+    var S=sets[key], centers=S.a.centers.slice(), valid=centers.filter(function(c){return c>-1e8;});
+    var sp=valid.length>1?(valid[valid.length-1]-valid[0])/(valid.length-1):100, pass,i;
+    for(pass=0;pass<3;pass++){
+      var bucket=[]; for(i=0;i<NC;i++) bucket.push([]);
+      S.rows.forEach(function(r){ var a=assignRow(r._toks,centers); r._toks.forEach(function(t,k){ bucket[a[k].col].push(t.cx); }); });
+      for(i=0;i<NC;i++){ if(bucket[i].length>=2&&centers[i]>-1e8){ var m=median(bucket[i]); if(Math.abs(m-centers[i])<0.6*sp) centers[i]=m; } }
+    }
+    S.rows.forEach(function(r){
+      var a=assignRow(r._toks,centers);
+      r._toks.forEach(function(t,k){
+        var col=a[k].col, msgs=[];
+        if(t.note) msgs.push(t.note);
+        if(lowConf(t)) msgs.push("Low OCR confidence ("+Math.round(t.conf)+"%)");
+        if(a[k].dist>0.7*sp) msgs.push("Column position unclear");
+        if(S.a.guessed) msgs.push("No header row recognised; column guessed");
+        var key2=col===12?"src":"q"+col;
+        if(col===12){ if(r.src!=="") msgs.push("Two numbers mapped to Total"); r.src=t.v; }
+        else { if(r.q[col]!=="") msgs.push("Two numbers mapped to this column"); r.q[col]=t.v; }
+        if(msgs.length) r.flags[key2]=msgs.join("; ");
+      });
+      delete r._toks; delete r._anch;
+    });
+  });
+  rows.forEach(function(r){ delete r._toks; delete r._anch; });
+}
+
+function mkRow(o){
+  var r={id:nid(),kind:"item",group:"",item:"",type:"",uom:"",q:["","","","","","","","","","","",""],src:"",flags:{},note:""};
+  for(var k in o) r[k]=o[k];
+  return r;
+}
+
+function parseImage(rawWords,opts){
+  opts=opts||{};
+  var words=rawWords.map(function(w){
+    return {text:(w.text||"").replace(/^[|\[\]{}_~`]+|[|\[\]{}_~`]+$/g,"").trim(),x0:w.x0,y0:w.y0,x1:w.x1,y1:w.y1,conf:w.conf};
+  }).filter(function(w){
+    return w.text&&!/^[\-\u2014\u2013=.:;,'"\u201c\u201d\u2018\u2019*+<>\\\/()]+$/.test(w.text)&&!(w.text.length===1&&w.conf<40);
+  });
+  var res={rows:[],notes:[],hints:{session:"",date:""}};
+  if(!words.length) return res;
+  var G=groupLines(words), lines=G.lines, h=G.h;
+  var cw=median(words.filter(function(w){return w.text.length>=3;}).map(function(w){return (w.x1-w.x0)/w.text.length;}))||10;
+  var rows=res.rows, skip={}, anchors=null, prevRow=null, prevLine=null, pending=null, lastGroup="";
+  for(var i=0;i<lines.length;i++){
+    if(skip[i]) continue;
+    var L=lines[i];
+    var ks={}; L.words.forEach(function(w){ var k=matchKey(w.text); if(k>=0) ks[k]=1; });
+    if(Object.keys(ks).length>=4){
+      var band=[L], j=i+1;
+      while(j<lines.length){
+        var N=lines[j], P=lines[j-1];
+        var hasData=N.words.some(function(w){return isType(w.text)||normUom(w.text);});
+        if(!hasData&&N.y0-P.y1<0.9*h&&N.words.length<=7){ band.push(N); skip[j]=1; j++; } else break;
+      }
+      anchors=buildAnchors(band);
+      continue;
+    }
+    var pr=parseLine(L,cw,res.hints);
+    if(pr.kind==="text"){
+      var txtv=(pr.textOnly||[]).map(function(w){return w.text;}).join(" ");
+      if(!txtv) continue;
+      var u=txtv.toUpperCase();
+      var heading=/RAW MATERIAL|MENU|FOOD ITEM|DAILY FOOD|BREAKFAST|LUNCH|DINNER|^DATE|SESSION|GROUP NAME|ITEM NAME/.test(u)||isDateTok(txtv);
+      var nextClose=lines[i+1]&&!skip[i+1]&&(lines[i+1].yc-L.yc<1.45*h);
+      var prevClose=prevRow&&prevLine&&(L.yc-prevLine.yc<1.45*h);
+      if(!heading&&nextClose&&!prevClose){ pending={text:txtv,yc:L.yc}; }
+      else if(!heading&&prevClose&&prevRow.kind==="item"){ prevRow.item=(prevRow.item+" "+txtv).trim(); prevRow.flags.item="Name joined from two lines"; }
+      else res.notes.push("Ignored text: "+txtv);
+      continue;
+    }
+    var row=mkRow({kind:pr.kind,group:pr.group,item:pr.item,type:pr.type,uom:pr.uom,flags:pr.flags,note:pr.note});
+    row._toks=pr.qty; row._anch=anchors;
+    if(pending&&L.yc-pending.yc<1.6*h&&row.kind==="item"){ row.item=(pending.text+" "+row.item).trim(); row.flags.item="Name joined from two lines"; }
+    else if(pending){ res.notes.push("Ignored text: "+pending.text); }
+    pending=null;
+    if(row.kind==="item"){
+      if(row.group) lastGroup=row.group;
+      else if(opts.carryGroup&&lastGroup){ row.group=lastGroup; row.flags.group="Copied from the row above"; }
+    }
+    rows.push(row); prevRow=row; prevLine=L;
+  }
+  if(pending) res.notes.push("Ignored text: "+pending.text);
+  assignColumns(rows);
+  return res;
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+
+<!-- ============ APP ============ -->
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var state={files:[],blocks:[]};
+var fid=0;
+var FLAGKEYS=["item","group","type","uom"];
+
+/* ---------- local storage ---------- */
+var KEY="dailyFoodPlanConverter.v1", saveTimer=null;
+function save(){
+  var data={date:$("#planDate").value,mode:$("#mode").value,carry:$("#carry").checked,
+    blocks:state.blocks.map(function(b){return {id:b.id,fileId:b.fileId,name:b.name,session:b.session,thumb:b.thumb||"",rows:b.rows,notes:b.notes,hints:b.hints,rawText:b.rawText};})};
+  try{ localStorage.setItem(KEY,JSON.stringify(data)); }
+  catch(e){
+    try{ data.blocks.forEach(function(b){b.thumb="";b.rawText="";}); localStorage.setItem(KEY,JSON.stringify(data)); }
+    catch(e2){ console.warn("Could not save",e2); }
+  }
+}
+function saveSoon(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,300); }
+function load(){
+  var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
+  if(!raw) return;
+  var data; try{ data=JSON.parse(raw); }catch(e){ return; }
+  if(data.date) $("#planDate").value=data.date;
+  if(data.mode) $("#mode").value=data.mode;
+  $("#carry").checked=!!data.carry;
+  state.blocks=(data.blocks||[]).map(function(b){ b.url=b.thumb||""; b.notes=b.notes||[]; b.hints=b.hints||{session:"",date:""}; b.rawText=b.rawText||""; return b; });
+  var mx=0; state.blocks.forEach(function(b){ b.rows.forEach(function(r){ var n=parseInt(String(r.id).replace(/\D/g,""),10); if(n>mx) mx=n; }); });
+  if(mx>_uid) _uid=mx;
+  if(state.blocks.length){
+    renderReview(); $("#sReview").classList.remove("hidden"); $("#sExport").classList.remove("hidden");
+    msg($("#uploadMsg"),"Restored your last session from this browser. Upload new images to start a new day.","info");
+  }
+}
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function parseNum(s){var t=String(s==null?"":s).replace(/,/g,"").trim(); if(t===""||isNaN(t)) return null; return Number(t);}
+function fmtDate(iso){ var p=iso.split("-"); var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return p[2]+"-"+M[+p[1]-1]+"-"+p[0].slice(2); }
+function isoToDate(iso){ var p=iso.split("-").map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+function msg(el,text,cls){ el.innerHTML=text?'<div class="msg '+cls+'">'+esc(text)+'</div>':""; }
+
+/* ---------- upload ---------- */
+function guessSession(name,idx){
+  var n=name.toLowerCase();
+  if(/break/.test(n)) return "BREAKFAST"; if(/lunch/.test(n)) return "LUNCH"; if(/dinner/.test(n)) return "DINNER";
+  return SESSIONS[Math.min(idx,2)];
+}
+function addFiles(list){
+  Array.prototype.forEach.call(list,function(f){
+    if(!/^image\//.test(f.type)) return;
+    state.files.push({id:++fid,file:f,session:guessSession(f.name,state.files.length),url:URL.createObjectURL(f),status:"Waiting",pct:0});
+  });
+  renderFiles();
+}
+function renderFiles(){
+  var el=$("#files");
+  el.innerHTML=state.files.map(function(f){
+    return '<div class="file" data-id="'+f.id+'"><img src="'+f.url+'" alt="">'+
+      '<div><div class="nm">'+esc(f.file.name||"Pasted image")+'</div><div class="st" id="st'+f.id+'">'+esc(f.status)+'</div><div class="bar"><i id="pb'+f.id+'" style="width:'+f.pct+'%"></i></div></div>'+
+      '<select aria-label="Session" data-sess>'+SESSIONS.map(function(s){return '<option'+(s===f.session?" selected":"")+'>'+s+'</option>';}).join("")+'</select>'+
+      '<button class="ghost small" data-rm>Remove</button></div>';
+  }).join("");
+  $("#btnRead").disabled=!state.files.length;
+}
+$("#files").addEventListener("change",function(e){
+  if(e.target.matches("[data-sess]")){ var id=+e.target.closest(".file").dataset.id; state.files.find(function(f){return f.id===id;}).session=e.target.value; }
+});
+$("#files").addEventListener("click",function(e){
+  if(e.target.matches("[data-rm]")){ var id=+e.target.closest(".file").dataset.id; state.files=state.files.filter(function(f){return f.id!==id;}); renderFiles(); }
+});
+$("#fileInput").addEventListener("change",function(e){ addFiles(e.target.files); e.target.value=""; });
+var drop=$("#drop");
+["dragenter","dragover"].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.add("over");});});
+["dragleave","drop"].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.remove("over");});});
+drop.addEventListener("drop",function(e){ addFiles(e.dataTransfer.files); });
+document.addEventListener("paste",function(e){
+  var items=(e.clipboardData&&e.clipboardData.items)||[], got=[];
+  Array.prototype.forEach.call(items,function(it){ if(it.kind==="file"&&/^image\//.test(it.type)) got.push(it.getAsFile()); });
+  if(got.length) addFiles(got);
+});
+
+/* ---------- OCR ---------- */
+function makeThumb(canvas){
+  try{
+    var w=Math.min(1000,canvas.width), h=Math.round(canvas.height*w/canvas.width);
+    var c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(canvas,0,0,w,h);
+    return c.toDataURL("image/jpeg",0.55);
+  }catch(e){ return ""; }
+}
+async function prep(file){
+  var bmp=await createImageBitmap(file);
+  var target=Math.min(4200,Math.max(bmp.width,2800)), scale=target/bmp.width;
+  var c=document.createElement("canvas"); c.width=Math.round(bmp.width*scale); c.height=Math.round(bmp.height*scale);
+  var x=c.getContext("2d",{willReadFrequently:true}); x.imageSmoothingQuality="high";
+  x.fillStyle="#fff"; x.fillRect(0,0,c.width,c.height); x.drawImage(bmp,0,0,c.width,c.height);
+  var im=x.getImageData(0,0,c.width,c.height), d=im.data;
+  for(var i=0;i<d.length;i+=4){ var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; g=(g-140)*1.35+140; g=g<0?0:g>255?255:g; d[i]=d[i+1]=d[i+2]=g; }
+  x.putImageData(im,0,0);
+  return c;
+}
+function extractWords(data){
+  var w=data.words;
+  if(!w||!w.length){ w=[]; (data.blocks||[]).forEach(function(b){(b.paragraphs||[]).forEach(function(p){(p.lines||[]).forEach(function(l){(l.words||[]).forEach(function(x){w.push(x);});});});}); }
+  return w.map(function(x){return {text:(x.text||"").trim(),x0:x.bbox.x0,y0:x.bbox.y0,x1:x.bbox.x1,y1:x.bbox.y1,conf:x.confidence};});
+}
+function setStatus(f,text,pct){
+  f.status=text; if(pct!=null) f.pct=pct;
+  var s=document.getElementById("st"+f.id), b=document.getElementById("pb"+f.id);
+  if(s) s.textContent=text; if(b) b.style.width=f.pct+"%";
+}
+$("#btnRead").addEventListener("click",async function(){
+  var btn=this; msg($("#uploadMsg"),"","");
+  if(typeof Tesseract==="undefined"){ msg($("#uploadMsg"),"The text-reading library did not load. Check your internet connection and reload the page.","err"); return; }
+  btn.disabled=true; btn.textContent="Reading...";
+  state.blocks=[];
+  var worker=null, cur=null;
+  try{
+    worker=await Tesseract.createWorker("eng",1,{logger:function(m){
+      if(cur&&m.status==="recognizing text") setStatus(cur,"Reading text "+Math.round(m.progress*100)+"%",10+Math.round(m.progress*85));
+    }});
+    await worker.setParameters({tessedit_pageseg_mode:$("#mode").value,preserve_interword_spaces:"1"});
+    for(var i=0;i<state.files.length;i++){
+      var f=state.files[i]; cur=f;
+      try{
+        setStatus(f,"Preparing image",5);
+        var canvas=await prep(f.file);
+        var out=await worker.recognize(canvas);
+        var words=extractWords(out.data);
+        var parsed=parseImage(words,{carryGroup:$("#carry").checked});
+        state.blocks.push({id:"b"+f.id,fileId:f.id,name:f.file.name||"Pasted image",session:f.session,url:f.url,rows:parsed.rows,notes:parsed.notes,hints:parsed.hints,rawText:out.data.text||"",thumb:makeThumb(canvas)});
+        setStatus(f,"Done: "+parsed.rows.length+" rows found",100);
+      }catch(err){ console.error(err); setStatus(f,"Could not read this image: "+(err.message||err),0); }
+    }
+  }catch(err){
+    console.error(err); msg($("#uploadMsg"),"Reading failed: "+(err.message||err)+". If you are offline, connect and try again.","err");
+  }finally{
+    if(worker){ try{await worker.terminate();}catch(e){} }
+    btn.disabled=false; btn.textContent="Read images";
+  }
+  if(state.blocks.length){ renderReview(); $("#sReview").classList.remove("hidden"); $("#sExport").classList.remove("hidden"); $("#sReview").scrollIntoView({behavior:"smooth"}); }
+});
+
+/* ---------- review ---------- */
+function rowCalc(r){
+  var sum=0,n=0; r.q.forEach(function(v){var x=parseNum(v); if(x!==null){sum+=x;n++;}});
+  var calc=n?Math.round(sum*10000)/10000:null, src=parseNum(r.src), st="";
+  if(r.kind==="item"){
+    if(src===null) st="NOSRC"; else if(calc===null) st="CHECK"; else st=Math.abs(src-calc)<0.01?"MATCH":"CHECK";
+  }
+  return {calc:calc,status:st};
+}
+var STLABEL={MATCH:"MATCH",CHECK:"CHECK",NOSRC:"NO SOURCE TOTAL","":""};
+function stats(){
+  var items=0,sums=0,flags=0,check=0;
+  state.blocks.forEach(function(b){ b.rows.forEach(function(r){
+    if(r.kind==="item"){items++; if(rowCalc(r).status==="CHECK") check++;} else sums++;
+    flags+=Object.keys(r.flags).length;
+  }); });
+  return {items:items,sums:sums,flags:flags,check:check};
+}
+function renderStats(){
+  var s=stats();
+  $("#stats").innerHTML=
+    '<div class="stat"><b>'+s.items+'</b><span>item rows</span></div>'+
+    '<div class="stat"><b>'+s.sums+'</b><span>summary rows</span></div>'+
+    '<div class="stat'+(s.flags?" warn":"")+'"><b>'+s.flags+'</b><span>highlighted cells</span></div>'+
+    '<div class="stat'+(s.check?" warn":"")+'"><b>'+s.check+'</b><span>rows where total does not match</span></div>';
+}
+function cellInput(r,f,cls){
+  var flag=r.flags[f], val=f==="src"?r.src:(f.charAt(0)==="q"&&/^q\d+$/.test(f)?r.q[+f.slice(1)]:r[f]);
+  return '<input class="'+(cls||"")+(flag?" flag":"")+'" data-f="'+f+'" value="'+esc(val)+'"'+(flag?' title="'+esc(flag)+'"':"")+(cls==="num"?' inputmode="decimal"':"")+' aria-label="'+f+'">';
+}
+function rowHTML(r){
+  var c=rowCalc(r), h='<tr data-r="'+r.id+'"'+(r.kind==="summary"?' class="sum"':"")+'>';
+  h+='<td class="sticky">'+cellInput(r,"item")+'</td>';
+  h+='<td>'+cellInput(r,"group")+'</td>';
+  h+='<td style="min-width:56px">'+cellInput(r,"type")+'</td>';
+  h+='<td style="min-width:56px">'+cellInput(r,"uom")+'</td>';
+  for(var k=0;k<12;k++) h+='<td>'+cellInput(r,"q"+k,"num")+'</td>';
+  h+='<td>'+cellInput(r,"src","num")+'</td>';
+  h+='<td class="calc" data-calc>'+(c.calc===null?"":c.calc)+'</td>';
+  h+='<td class="status '+c.status+'" data-st>'+STLABEL[c.status]+'</td>';
+  h+='<td class="act"><select data-kind aria-label="Row kind"><option value="item"'+(r.kind==="item"?" selected":"")+'>Item</option><option value="summary"'+(r.kind==="summary"?" selected":"")+'>Summary</option></select></td>';
+  h+='<td class="act"><button class="ghost small" data-del title="'+esc(r.note||"")+'">Delete</button></td></tr>';
+  return h;
+}
+function blockHTML(b){
+  var head='<th class="sticky">Item Name</th><th>Group Name</th><th>Type</th><th>UoM</th>'+DEPTS.map(function(d){return "<th>"+esc(d)+"</th>";}).join("")+
+    '<th>Source Total Qty</th><th>Calculated Total Qty</th><th>Verification</th><th>Row kind</th><th></th>';
+  return '<div class="block" data-b="'+b.id+'"><div class="hd"><span class="t" title="'+esc(b.name)+'">'+esc(b.name)+'</span>'+
+    '<label>Session <select data-bsess>'+SESSIONS.map(function(s){return '<option'+(s===b.session?" selected":"")+'>'+s+'</option>';}).join("")+'</select></label>'+
+    '<button class="ghost small" data-add>Add blank row</button></div>'+
+    '<details><summary>Source image'+(b.hints.session||b.hints.date?" (text on image mentions: "+esc((b.hints.session+" "+b.hints.date).trim())+")":"")+'</summary><div class="zoomwrap">'+(b.url?'<img src="'+b.url+'" alt="Source image" data-zoom>':'<p>The image is not stored after a reload.</p>')+'</div></details>'+
+    (b.notes.length?'<details><summary>'+b.notes.length+' line(s) of text were not placed in the table</summary><pre>'+esc(b.notes.join("\n"))+'</pre></details>':"")+
+
+```
+'<details><summary>Raw text the reader saw</summary><pre>'+esc(b.rawText)+'</pre></details>'+
+'<div class="grid"><table><thead><tr>'+head+'</tr></thead><tbody>'+
+(b.rows.length?b.rows.map(rowHTML).join(""):'<tr><td colspan="22" style="padding:14px">No rows were found in this image. Try the Sparse text reading mode, or add rows by hand.</td></tr>')+
+'</tbody></table></div></div>';
+```
+
+}
+function renderReview(){
+$(”#blocks”).innerHTML=state.blocks.map(blockHTML).join(””);
+renderStats(); saveSoon();
+}
+function findBlock(el){ var id=el.closest(”.block”).dataset.b; return state.blocks.find(function(b){return b.id===id;}); }
+function findRow(b,el){ var id=el.closest(“tr”).dataset.r; return b.rows.find(function(r){return r.id===id;}); }
+$(”#blocks”).addEventListener(“input”,function(e){
+var inp=e.target; if(!inp.matches(“input[data-f]”)) return;
+var b=findBlock(inp), r=findRow(b,inp), f=inp.dataset.f, v=inp.value;
+if(f===“src”) r.src=v; else if(/^q\d+$/.test(f)) r.q[+f.slice(1)]=v;
+else if(f===“type”) r.type=v.toUpperCase(); else if(f===“uom”){ r.uom=v; } else r[f]=v;
+if(r.flags[f]){ delete r.flags[f]; inp.classList.remove(“flag”); inp.removeAttribute(“title”); }
+var tr=inp.closest(“tr”), c=rowCalc(r);
+tr.querySelector(”[data-calc]”).textContent=c.calc===null?””:c.calc;
+var st=tr.querySelector(”[data-st]”); st.className=“status “+c.status; st.textContent=STLABEL[c.status];
+renderStats(); saveSoon();
+});
+$(”#blocks”).addEventListener(“change”,function(e){
+var b=findBlock(e.target);
+if(e.target.matches(”[data-bsess]”)){ b.session=e.target.value; saveSoon(); }
+if(e.target.matches(”[data-kind]”)){ var r=findRow(b,e.target); r.kind=e.target.value; renderReview(); }
+});
+$(”#blocks”).addEventListener(“click”,function(e){
+var t=e.target, b=t.closest(”.block”)?findBlock(t):null;
+if(t.matches(”[data-del]”)){ var r=findRow(b,t); b.rows=b.rows.filter(function(x){return x!==r;}); renderReview(); }
+if(t.matches(”[data-add]”)){ b.rows.push(mkRow({})); renderReview(); }
+if(t.matches(”[data-zoom]”)){ t.classList.toggle(“zoom”); }
+});
+
+/* ––––– export ––––– */
+function colL(n){ var s=””; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; }
+async function buildWorkbook(){
+var dateIso=$(”#planDate”).value||“2026-10-11”, D=isoToDate(dateIso);
+var wb=new ExcelJS.Workbook(); wb.creator=“Daily Food Plan Converter”; wb.created=new Date();
+wb.calcProperties={fullCalcOnLoad:true};
+var NAVY=“FF1F3864”, SKY=“FFDDEBF7”, GREY=“FFF2F2F2”, YEL=“FFFFE680”;
+var thin={style:“thin”,color:{argb:“FF9AA7BD”}}, BORDER={top:thin,left:thin,bottom:thin,right:thin};
+var FONT={name:“Calibri”,size:10};
+var HEAD=[“Date”,“Session Name”,“Group Name”,“Item Name”,“Type”,“UoM”].concat(DEPTS,[“Source Total Qty”,“Calculated Total Qty”,“Verification Status”]);
+var NCOL=HEAD.length; // 21
+var LASTC=colL(NCOL);
+var FIRST=4, LIMIT=1000;
+var flagCount=0, checkList=[];
+var allItems=[]; // for item-wise summary
+var hasBlankType={BREAKFAST:false,LUNCH:false,DINNER:false};
+var summaryRows=[];
+var CF_OK={type:“pattern”,pattern:“solid”,bgColor:{argb:“FFC6EFCE”}}, CF_BAD={type:“pattern”,pattern:“solid”,bgColor:{argb:“FFFFC7CE”}}, CF_WARN={type:“pattern”,pattern:“solid”,bgColor:{argb:“FFFFEB9C”}};
+function statusCF(ref,okTxt){
+return {ref:ref,rules:[
+{type:“cellIs”,operator:“equal”,formulae:[’”’+okTxt+’”’],style:{fill:CF_OK,font:{color:{argb:“FF006100”},bold:true}},priority:1},
+{type:“cellIs”,operator:“equal”,formulae:[’“CHECK”’],style:{fill:CF_BAD,font:{color:{argb:“FF9C0006”},bold:true}},priority:2},
+{type:“cellIs”,operator:“equal”,formulae:[’“NO SOURCE TOTAL”’],style:{fill:CF_WARN,font:{color:{argb:“FF7F6000”},bold:true}},priority:3}
+]};
+}
+function headerStyle(cell){
+cell.font={name:“Calibri”,size:10,bold:true,color:{argb:“FFFFFFFF”}};
+cell.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:NAVY}};
+cell.alignment={wrapText:true,vertical:“middle”,horizontal:“center”}; cell.border=BORDER;
+}
+function printSetup(ws,lastRow,lastCol,titleRow){
+ws.pageSetup={orientation:“landscape”,paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,printArea:“A1:”+lastCol+Math.max(lastRow,titleRow),printTitlesRow:titleRow+”:”+titleRow,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}};
+}
+
+/* — session sheets — */
+SESSIONS.forEach(function(S){
+var ws=wb.addWorksheet(S,{views:[{state:“frozen”,xSplit:4,ySplit:3}]});
+ws.getCell(“A1”).value=“RAW MATERIALS \u2013 DAILY FOOD PLAN”; ws.getCell(“A1”).font={name:“Calibri”,size:14,bold:true,color:{argb:NAVY}};
+ws.getCell(“A2”).value=“Session: “+S+”     Date: “+fmtDate(dateIso); ws.getCell(“A2”).font={name:“Calibri”,size:11,bold:true};
+var hr=ws.getRow(3); HEAD.forEach(function(h,i){ var c=hr.getCell(i+1); c.value=h; headerStyle(c); }); hr.height=44;
+var widths=[11,12,18,34,7,7].concat(DEPTS.map(function(){return 12;}),[13,14,18]);
+widths.forEach(function(w,i){ ws.getColumn(i+1).width=w; });
+var rows=[]; state.blocks.filter(function(b){return b.session===S;}).forEach(function(b){ b.rows.forEach(function(r){ if(r.kind===“item”) rows.push(r); else summaryRows.push({session:S,row:r}); }); });
+var sections=[[“RM”,“RAW MATERIALS (RM)”],[“MN”,“MENU / FOOD ITEMS (MN)”],[“OTHER”,“TYPE NOT READ \u2013 PLEASE CHECK”]];
+var r=FIRST, n=0;
+sections.forEach(function(sec){
+var list=rows.filter(function(x){ var t=(x.type||””).toUpperCase(); return sec[0]===“OTHER”?(t!==“RM”&&t!==“MN”):t===sec[0]; });
+if(!list.length) return;
+for(var c=1;c<=NCOL;c++){ var bc=ws.getRow(r).getCell(c); bc.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:SKY}}; bc.border=BORDER; bc.font={name:“Calibri”,size:10,bold:true}; }
+ws.getRow(r).getCell(1).value=sec[1]; r++;
+list.forEach(function(it,idx){
+var row=ws.getRow(r), cal=rowCalc(it);
+if(!(it.type||””).trim()) hasBlankType[S]=true;
+row.getCell(1).value=D; row.getCell(1).numFmt=“dd-mmm-yy”;
+row.getCell(2).value=S; row.getCell(3).value=it.group||null; row.getCell(4).value=it.item||null;
+row.getCell(5).value=it.type||null; row.getCell(6).value=it.uom||null;
+it.q.forEach(function(v,k){ var x=parseNum(v); row.getCell(7+k).value=x!==null?x:(String(v).trim()!==””?String(v):null); });
+var sx=parseNum(it.src); row.getCell(19).value=sx!==null?sx:(String(it.src).trim()!==””?String(it.src):null);
+row.getCell(20).value={formula:‘IF(COUNT(G’+r+’:R’+r+’)=0,””,SUM(G’+r+’:R’+r+’))’,result:cal.calc===null?””:cal.calc};
+row.getCell(21).value={formula:‘IF(S’+r+’=””,“NO SOURCE TOTAL”,IF(T’+r+’=””,“CHECK”,IF(ABS(S’+r+’-T’+r+’)<0.01,“MATCH”,“CHECK”)))’,result:STLABEL[cal.status]};
+for(var c2=1;c2<=NCOL;c2++){
+var cell=row.getCell(c2); cell.font=FONT; cell.border=BORDER;
+cell.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:idx%2?GREY:“FFFFFFFF”}};
+cell.alignment={vertical:“middle”,horizontal:(c2>=7&&c2<=20)?“right”:“left”};
+if(c2>=7&&c2<=20) cell.numFmt=“0.00”;
+if(c2===21) cell.alignment={vertical:“middle”,horizontal:“center”};
+}
+row.getCell(2).dataValidation={type:“list”,allowBlank:true,formulae:[’“BREAKFAST,LUNCH,DINNER”’],errorStyle:“warning”};
+row.getCell(5).dataValidation={type:“list”,allowBlank:true,formulae:[’“RM,MN”’],errorStyle:“warning”};
+row.getCell(6).dataValidation={type:“list”,allowBlank:true,formulae:[’“Kg,Nos,Ltr”’],errorStyle:“warning”};
+var map={group:3,item:4,type:5,uom:6,src:19};
+Object.keys(it.flags).forEach(function(k){
+var col=map[k]||(/^q\d+$/.test(k)?7+(+k.slice(1)):0); if(!col) return;
+var cc=row.getCell(col); cc.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:YEL}};
+cc.note=“Please verify against the source image.”+(it.flags[k]?”\n”+it.flags[k]:””); flagCount++;
+});
+if(cal.status===“CHECK”) checkList.push({session:S,item:it.item,src:sx,calc:cal.calc});
+allItems.push({item:it.item,type:it.type,uom:it.uom});
+r++; n++;
+});
+});
+if(!n){ ws.getCell(“A4”).value=“No rows loaded for this session.”; ws.getCell(“A4”).font={name:“Calibri”,size:10,italic:true}; r=5; }
+var last=r-1;
+ws.autoFilter={from:“A3”,to:LASTC+Math.max(last,3)};
+ws.addConditionalFormatting(statusCF(“U”+FIRST+”:U”+LIMIT,“MATCH”));
+ws.addConditionalFormatting({ref:“D”+FIRST+”:D”+LIMIT,rules:[{type:“expression”,formulae:[‘AND($E’+FIRST+’<>””,$D’+FIRST+’=””)’],style:{fill:{type:“pattern”,pattern:“solid”,bgColor:{argb:“FFF8CBAD”}}},priority:4}]});
+ws.addConditionalFormatting({ref:“F”+FIRST+”:F”+LIMIT,rules:[{type:“expression”,formulae:[‘AND($D’+FIRST+’<>””,$F’+FIRST+’=””)’],style:{fill:{type:“pattern”,pattern:“solid”,bgColor:{argb:“FFF8CBAD”}}},priority:5}]});
+printSetup(ws,last,LASTC,3);
+});
+
+/* — raw data (Excel Table) — */
+var wr=wb.addWorksheet(“RAW DATA”,{views:[{state:“frozen”,xSplit:5,ySplit:4}]});
+wr.getCell(“A1”).value=“RAW MATERIALS \u2013 DAILY FOOD PLAN: RAW DATA”; wr.getCell(“A1”).font={name:“Calibri”,size:14,bold:true,color:{argb:NAVY}};
+wr.getCell(“A2”).value=“Flat copy of all item rows at the time of download. Edit quantities on the BREAKFAST / LUNCH / DINNER sheets; the summary reads from those sheets.”; wr.getCell(“A2”).font={name:“Calibri”,size:10,italic:true};
+var RH=[“Date”,“Session Name”,“Section”,“Group Name”,“Item Name”,“Type”,“UoM”].concat(DEPTS,[“Source Total Qty”,“Calculated Total Qty”,“Verification Status”]);
+var tRows=[], metas=[];
+SESSIONS.forEach(function(S){
+state.blocks.filter(function(b){return b.session===S;}).forEach(function(b){ b.rows.forEach(function(it){
+if(it.kind!==“item”) return;
+var t=(it.type||””).toUpperCase(), sec=t===“RM”?“RAW MATERIALS”:t===“MN”?“MENU / FOOD ITEMS”:“TYPE NOT READ”;
+var line=[D,S,sec,it.group||””,it.item||””,it.type||””,it.uom||””];
+it.q.forEach(function(v){ var x=parseNum(v); line.push(x!==null?x:(String(v).trim()!==””?String(v):null)); });
+var sx=parseNum(it.src); line.push(sx!==null?sx:(String(it.src).trim()!==””?String(it.src):null)); line.push(null); line.push(””);
+tRows.push(line); metas.push(it);
+}); });
+});
+if(!tRows.length){ var blank=[null,””,””,””,””,””,””]; for(var z=0;z<15;z++) blank.push(null); tRows.push(blank); metas.push(null); }
+wr.addTable({name:“tblRawData”,ref:“A4”,headerRow:true,totalsRow:false,style:{theme:“TableStyleMedium2”,showRowStripes:true},columns:RH.map(function(n){return {name:n,filterButton:true};}),rows:tRows});
+var rdWidths=[11,12,20,18,34,7,7].concat(DEPTS.map(function(){return 12;}),[13,14,18]);
+rdWidths.forEach(function(w,i){ wr.getColumn(i+1).width=w; });
+wr.getRow(4).height=44; wr.getRow(4).eachCell(function(c){ c.alignment={wrapText:true,vertical:“middle”,horizontal:“center”}; });
+tRows.forEach(function(_,i){
+var rn=5+i, row=wr.getRow(rn), cal=metas[i]?rowCalc(metas[i]):{calc:null,status:””};
+row.getCell(1).numFmt=“dd-mmm-yy”;
+row.getCell(21).value={formula:‘IF(COUNT(H’+rn+’:S’+rn+’)=0,””,SUM(H’+rn+’:S’+rn+’))’,result:cal.calc===null?””:cal.calc};
+row.getCell(22).value={formula:‘IF(T’+rn+’=””,“NO SOURCE TOTAL”,IF(U’+rn+’=””,“CHECK”,IF(ABS(T’+rn+’-U’+rn+’)<0.01,“MATCH”,“CHECK”)))’,result:STLABEL[cal.status]||””};
+for(var c=1;c<=22;c++){ var cell=row.getCell(c); cell.font=FONT; cell.border=BORDER; if(c>=8&&c<=21){cell.numFmt=“0.00”; cell.alignment={horizontal:“right”};} }
+row.getCell(2).dataValidation={type:“list”,allowBlank:true,formulae:[’“BREAKFAST,LUNCH,DINNER”’],errorStyle:“warning”};
+row.getCell(6).dataValidation={type:“list”,allowBlank:true,formulae:[’“RM,MN”’],errorStyle:“warning”};
+row.getCell(7).dataValidation={type:“list”,allowBlank:true,formulae:[’“Kg,Nos,Ltr”’],errorStyle:“warning”};
+});
+wr.addConditionalFormatting(statusCF(“V5:V”+(4+tRows.length),“MATCH”));
+printSetup(wr,4+tRows.length,“V”,4);
+
+/* — source subtotals — */
+if(summaryRows.length){
+var wsx=wb.addWorksheet(“SOURCE SUBTOTALS”,{views:[{state:“frozen”,ySplit:4}]});
+wsx.getCell(“A1”).value=“SUMMARY / SUBTOTAL ROWS AS SHOWN IN THE SOURCE”; wsx.getCell(“A1”).font={name:“Calibri”,size:14,bold:true,color:{argb:NAVY}};
+wsx.getCell(“A2”).value=“Kept exactly as read. These rows are not included in any item calculation.”; wsx.getCell(“A2”).font={name:“Calibri”,size:10,italic:true};
+var SH=[“Date”,“Session Name”,“Label”].concat(DEPTS,[“Source Total Qty”]);
+SH.forEach(function(h,i){ var c=wsx.getRow(4).getCell(i+1); c.value=h; headerStyle(c); }); wsx.getRow(4).height=44;
+[11,12,30].concat(DEPTS.map(function(){return 12;}),[13]).forEach(function(w,i){ wsx.getColumn(i+1).width=w; });
+summaryRows.forEach(function(sr,idx){
+var row=wsx.getRow(5+idx), it=sr.row;
+row.getCell(1).value=D; row.getCell(1).numFmt=“dd-mmm-yy”; row.getCell(2).value=sr.session; row.getCell(3).value=it.item||null;
+it.q.forEach(function(v,k){ var x=parseNum(v); row.getCell(4+k).value=x!==null?x:(String(v).trim()!==””?String(v):null); });
+var sx=parseNum(it.src); row.getCell(16).value=sx!==null?sx:null;
+for(var c=1;c<=16;c++){ var cell=row.getCell(c); cell.font={name:“Calibri”,size:10,bold:true}; cell.border=BORDER; cell.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:SKY}}; if(c>=4){cell.numFmt=“0.00”;cell.alignment={horizontal:“right”};} }
+Object.keys(it.flags).forEach(function(k){ var col=k===“src”?16:(/^q\d+$/.test(k)?4+(+k.slice(1)):0); if(!col) return; var cc=row.getCell(col); cc.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:YEL}}; cc.note=“Please verify against the source image.”; flagCount++; });
+});
+wsx.autoFilter={from:“A4”,to:“P”+(4+summaryRows.length)};
+printSetup(wsx,4+summaryRows.length,“P”,4);
+}
+
+/* — daily summary — */
+var sm=wb.addWorksheet(“DAILY SUMMARY”,{views:[{showGridLines:false}]});
+sm.columns=[{width:40},{width:15},{width:15},{width:15},{width:15},{width:15},{width:15},{width:15}];
+function R(S,c){ return S+”!$”+c+”$”+FIRST+”:$”+c+”$”+LIMIT; }
+function sectionBar(r,text){ for(var c=1;c<=8;c++){ var x=sm.getRow(r).getCell(c); x.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:SKY}}; x.border=BORDER; } var t=sm.getRow(r).getCell(1); t.value=text; t.font={name:“Calibri”,size:11,bold:true,color:{argb:NAVY}}; }
+function heads(r,arr){ arr.forEach(function(h,i){ var c=sm.getRow(r).getCell(i+1); c.value=h; headerStyle(c); }); sm.getRow(r).height=30; }
+function body(c,align){ c.font=FONT; c.border=BORDER; if(align) c.alignment={horizontal:align}; }
+sm.getCell(“A1”).value=“RAW MATERIALS \u2013 DAILY FOOD PLAN: SUMMARY”; sm.getCell(“A1”).font={name:“Calibri”,size:14,bold:true,color:{argb:NAVY}};
+sm.getCell(“A2”).value=“Date: “+fmtDate(dateIso)+”   Quantities with different units (Kg, Nos, Ltr) are never added together.”; sm.getCell(“A2”).font={name:“Calibri”,size:10,italic:true};
+var cur=4;
+// A. date-wise
+sectionBar(cur,“A. DATE-WISE SUMMARY”); cur++;
+heads(cur,[“Session”,“Type”,“Item records”,“Kg total”,“Nos total”,“Ltr total”]); cur++;
+var aStart=cur;
+SESSIONS.forEach(function(S){
+var types=[“RM”,“MN”]; if(hasBlankType[S]) types.push(””);
+types.forEach(function(t){
+var row=sm.getRow(cur), tc=t===””?’””’:’”’+t+’”’;
+row.getCell(1).value=S; row.getCell(2).value=t===””?”(blank)”:t;
+row.getCell(3).value={formula:‘COUNTIFS(’+R(S,“E”)+’,’+tc+’,’+R(S,“U”)+’,”<>”)’};
+[“Kg”,“Nos”,“Ltr”].forEach(function(u,k){ row.getCell(4+k).value={formula:‘SUMIFS(’+R(S,“T”)+’,’+R(S,“E”)+’,’+tc+’,’+R(S,“F”)+’,”’+u+’”)’}; });
+for(var c=1;c<=6;c++){ body(row.getCell(c),c>=3?“right”:“left”); if(c>=4) row.getCell(c).numFmt=“0.00”; }
+cur++;
+});
+});
+var aEnd=cur-1;
+[[“Daily total \u2013 RM”,“RM”],[“Daily total \u2013 MN”,“MN”]].forEach(function(p){
+var row=sm.getRow(cur); row.getCell(1).value=p[0]; row.getCell(2).value=p[1];
+for(var c=3;c<=6;c++){ var L=colL(c); row.getCell(c).value={formula:‘SUMIFS(’+L+aStart+’:’+L+aEnd+’,$B$’+aStart+’:$B$’+aEnd+’,”’+p[1]+’”)’}; }
+for(var c2=1;c2<=6;c2++){ body(row.getCell(c2),c2>=3?“right”:“left”); row.getCell(c2).font={name:“Calibri”,size:10,bold:true}; if(c2>=4) row.getCell(c2).numFmt=“0.00”; }
+cur++;
+});
+(function(){
+var row=sm.getRow(cur); row.getCell(1).value=“Grand total (all items, by unit)”;
+for(var c=3;c<=6;c++){ var L=colL(c); row.getCell(c).value={formula:‘SUM(’+L+aStart+’:’+L+aEnd+’)’}; }
+for(var c2=1;c2<=6;c2++){ body(row.getCell(c2),c2>=3?“right”:“left”); row.getCell(c2).font={name:“Calibri”,size:10,bold:true}; row.getCell(c2).fill={type:“pattern”,pattern:“solid”,fgColor:{argb:SKY}}; if(c2>=4) row.getCell(c2).numFmt=“0.00”; }
+cur++;
+})();
+cur++;
+// B. location-wise
+sectionBar(cur,“B. LOCATION-WISE SUMMARY”); cur++;
+var fRow=cur; sm.getRow(cur).getCell(1).value=“Item type filter (ALL, RM or MN)”; sm.getRow(cur).getCell(1).font={name:“Calibri”,size:10,bold:true};
+var fc=sm.getRow(cur).getCell(2); fc.value=“ALL”; fc.font={name:“Calibri”,size:10,bold:true}; fc.border=BORDER; fc.fill={type:“pattern”,pattern:“solid”,fgColor:{argb:“FFFFF2CC”}};
+fc.dataValidation={type:“list”,allowBlank:false,formulae:[’“ALL,RM,MN”’]};
+cur+=2;
+[“Kg”,“Nos”,“Ltr”].forEach(function(u){
+heads(cur,[“Location (”+u+”)”,“Breakfast”,“Lunch”,“Dinner”,“Entire day”]); cur++;
+DEPTS.forEach(function(d,k){
+var row=sm.getRow(cur), dc=colL(7+k);
+row.getCell(1).value=d;
+SESSIONS.forEach(function(S,si){
+row.getCell(2+si).value={formula:‘IF($B$’+fRow+’=“ALL”,SUMIFS(’+R(S,dc)+’,’+R(S,“F”)+’,”’+u+’”),SUMIFS(’+R(S,dc)+’,’+R(S,“F”)+’,”’+u+’”,’+R(S,“E”)+’,$B$’+fRow+’))’};
+});
+row.getCell(5).value={formula:‘SUM(B’+cur+’:D’+cur+’)’};
+for(var c=1;c<=5;c++){ body(row.getCell(c),c>=2?“right”:“left”); if(c>=2) row.getCell(c).numFmt=“0.00”; }
+cur++;
+});
+var tr=sm.getRow(cur); tr.getCell(1).value=“Total (”+u+”)”;
+for(var c3=2;c3<=5;c3++){ var Lc=colL(c3); tr.getCell(c3).value={formula:‘SUM(’+Lc+(cur-12)+’:’+Lc+(cur-1)+’)’}; }
+for(var c4=1;c4<=5;c4++){ body(tr.getCell(c4),c4>=2?“right”:“left”); tr.getCell(c4).font={name:“Calibri”,size:10,bold:true}; tr.getCell(c4).fill={type:“pattern”,pattern:“solid”,fgColor:{argb:SKY}}; if(c4>=2) tr.getCell(c4).numFmt=“0.00”; }
+cur+=2;
+});
+// C. item-wise
+sectionBar(cur,“C. ITEM-WISE SUMMARY”); cur++;
+heads(cur,[“Item name”,“Type”,“UoM”,“Breakfast”,“Lunch”,“Dinner”,“Daily quantity”,“Verification”]); cur++;
+var seen={}, uniq=[];
+allItems.forEach(function(it){ var k=[it.item,it.type,it.uom].join(”\u0001”); if(!seen[k]){seen[k]=1;uniq.push(it);} });
+var cStart=cur;
+uniq.forEach(function(it){
+var row=sm.getRow(cur);
+row.getCell(1).value=it.item||null; row.getCell(2).value=it.type||null; row.getCell(3).value=it.uom||null;
+SESSIONS.forEach(function(S,si){ row.getCell(4+si).value={formula:‘SUMIFS(’+R(S,“T”)+’,’+R(S,“D”)+’,$A’+cur+’,’+R(S,“E”)+’,$B’+cur+’,’+R(S,“F”)+’,$C’+cur+’)’}; });
+row.getCell(7).value={formula:‘SUM(D’+cur+’:F’+cur+’)’};
+var chk=SESSIONS.map(function(S){ return ‘COUNTIFS(’+R(S,“D”)+’,$A’+cur+’,’+R(S,“E”)+’,$B’+cur+’,’+R(S,“F”)+’,$C’+cur+’,’+R(S,“U”)+’,“CHECK”)’; }).join(”+”);
+row.getCell(8).value={formula:‘IF(’+chk+’>0,“CHECK”,“OK”)’};
+for(var c=1;c<=8;c++){ body(row.getCell(c),c>=4&&c<=7?“right”:(c===8?“center”:“left”)); if(c>=4&&c<=7) row.getCell(c).numFmt=“0.00”; }
+cur++;
+});
+if(uniq.length){
+sm.addConditionalFormatting({ref:“H”+cStart+”:H”+(cur-1),rules:[
+{type:“cellIs”,operator:“equal”,formulae:[’“OK”’],style:{fill:CF_OK,font:{color:{argb:“FF006100”},bold:true}},priority:1},
+{type:“cellIs”,operator:“equal”,formulae:[’“CHECK”’],style:{fill:CF_BAD,font:{color:{argb:“FF9C0006”},bold:true}},priority:2}]});
+} else { sm.getRow(cur).getCell(1).value=“No item rows loaded.”; cur++; }
+cur++;
+// D. verification
+sectionBar(cur,“D. VERIFICATION SUMMARY”); cur++;
+function sumCount(txt){ return SESSIONS.map(function(S){ return ‘COUNTIF(’+R(S,“U”)+’,”’+txt+’”)’; }).join(”+”); }
+var vs=[[“Total item records”,sumCount(“MATCH”)+”+”+sumCount(“CHECK”)+”+”+sumCount(“NO SOURCE TOTAL”)],
+[“Records matching the source total”,sumCount(“MATCH”)],
+[“Records needing verification (total differs)”,sumCount(“CHECK”)],
+[“Records with no source total”,sumCount(“NO SOURCE TOTAL”)]];
+vs.forEach(function(p){ var row=sm.getRow(cur); row.getCell(1).value=p[0]; row.getCell(2).value={formula:p[1]}; body(row.getCell(1),“left”); body(row.getCell(2),“right”); row.getCell(2).font={name:“Calibri”,size:10,bold:true}; cur++; });
+(function(){ var row=sm.getRow(cur); row.getCell(1).value=“Cells highlighted as hard to read (at download)”; row.getCell(2).value=flagCount; body(row.getCell(1),“left”); body(row.getCell(2),“right”); cur++; })();
+cur++;
+sm.getRow(cur).getCell(1).value=“Rows where the source total differs from the calculated total (at download)”; sm.getRow(cur).getCell(1).font={name:“Calibri”,size:10,bold:true}; cur++;
+heads(cur,[“Item name”,“Session”,“Source total”,“Calculated total”]); cur++;
+if(!checkList.length){ var nr=sm.getRow(cur); nr.getCell(1).value=“None”; body(nr.getCell(1),“left”); cur++; }
+checkList.forEach(function(x){
+var row=sm.getRow(cur); row.getCell(1).value=x.item||null; row.getCell(2).value=x.session; row.getCell(3).value=x.src; row.getCell(4).value=x.calc;
+for(var c=1;c<=4;c++){ body(row.getCell(c),c>=3?“right”:“left”); if(c>=3) row.getCell(c).numFmt=“0.00”; }
+cur++;
+});
+sm.pageSetup={orientation:“landscape”,paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,printArea:“A1:H”+cur};
+
+// sheet order: BREAKFAST, LUNCH, DINNER, DAILY SUMMARY, RAW DATA, SOURCE SUBTOTALS
+var order=[“BREAKFAST”,“LUNCH”,“DINNER”,“DAILY SUMMARY”,“RAW DATA”,“SOURCE SUBTOTALS”];
+wb.worksheets.forEach(function(w){ w.orderNo=order.indexOf(w.name); });
+return wb;
+}
+$(”#btnClear”).addEventListener(“click”,function(){
+if(!confirm(“Remove the saved readings from this browser?”)) return;
+try{ localStorage.removeItem(KEY); }catch(e){}
+state.blocks=[]; renderReview();
+$(”#sReview”).classList.add(“hidden”); $(”#sExport”).classList.add(“hidden”);
+clearTimeout(saveTimer); msg($(”#uploadMsg”),“Saved data cleared.”,“info”);
+});
+[“planDate”,“mode”,“carry”].forEach(function(id){ $(”#”+id).addEventListener(“change”,saveSoon); });
+$(”#btnExport”).addEventListener(“click”,async function(){
+var btn=this, out=$(”#exportMsg”); msg(out,””,””);
+if(typeof ExcelJS===“undefined”){ msg(out,“The Excel library did not load. Check your internet connection and reload the page.”,“err”); return; }
+if(!state.blocks.length){ msg(out,“Read at least one image first.”,“err”); return; }
+btn.disabled=true;
+try{
+var wb=await buildWorkbook();
+var buf=await wb.xlsx.writeBuffer();
+var blob=new Blob([buf],{type:“application/vnd.openxmlformats-officedocument.spreadsheetml.sheet”});
+var a=document.createElement(“a”); a.href=URL.createObjectURL(blob); a.download=“Daily_Raw_Materials_Food_Plan.xlsx”;
+document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+var s=stats();
+msg(out,“Downloaded. “+s.items+” item rows, “+s.flags+” highlighted cells, “+s.check+” rows where the total differs.”,“info”);
+}catch(err){ console.error(err); msg(out,“Could not build the workbook: “+(err.message||err),“err”); }
+finally{ btn.disabled=false; }
+});
+load();
+})();
+</script>
+
+</body>
+</html>
